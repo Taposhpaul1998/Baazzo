@@ -8,8 +8,15 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Default font: English + Bangla fallback */
+  --font-sans: var(--font-inter), var(--font-noto-bengali), sans-serif;
+
+  /* Headings */
+  --font-heading: var(--font-inter), sans-serif;
+
+  /* Bangla text */
+  --font-bangla: var(--font-noto-bengali), sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +29,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), var(--font-noto-bengali), sans-serif;
 }
