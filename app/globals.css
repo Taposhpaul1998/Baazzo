@@ -1,33 +1,20 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Typography: Plus Jakarta Sans for headings & Inter for body/content */
+  --font-heading: var(--font-heading), sans-serif;
+  --font-body: var(--font-body), sans-serif;
+  --font-sans: var(--font-body), sans-serif;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Primary Brand Accent (Soft & Premium Warm Orange) */
+  --color-primary: #f06a38;
+  --color-primary-hover: #d85424;
+  --color-primary-light: #fb923c;
+  --color-primary-soft: #fff7ed;
 
-  /* Default font: English + Bangla fallback */
-  --font-sans: var(--font-inter), var(--font-noto-bengali), sans-serif;
-
-  /* Headings */
-  --font-heading: var(--font-inter), sans-serif;
-
-  /* Bangla text */
-  --font-bangla: var(--font-noto-bengali), sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), var(--font-noto-bengali), sans-serif;
+  /* Dark Slate Base (Footer & Dark Sections) */
+  --color-dark-base: #0f172a;
+  --color-dark-deep: #020617;
+  --color-dark-border: #1e293b;
+  --color-dark-muted: #94a3b8;
 }

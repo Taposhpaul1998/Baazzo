@@ -1,11 +1,7 @@
-import Footer from './components/layout/Footer';
-import Header from './components/layout/Header';
-
 export default function Home() {
   return (
-    <>
-     <Header/>
-     <Footer/>
-    </>
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-heading font-bold">Welcome to Baazzo</h1>
+    </div>
   );
 }
