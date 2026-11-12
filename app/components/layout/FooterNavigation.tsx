@@ -6,7 +6,7 @@ interface NavigationLink {
 }
 
 const navigationLinks: NavigationLink[] = [
-  { name: "Terms & Conditions", href: "/termsConditions" },
+  { name: "Terms & Conditions", href: "/terms" },
   { name: "Privacy Policy", href: "/privacyPolicy" },
   { name: "About Us", href: "/about" },
   { name: "Contact Us", href: "/contact" },

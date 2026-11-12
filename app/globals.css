@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Swiper height fix — ensures slides fill the parent container */
+.hero-swiper,
+.hero-swiper .swiper-wrapper,
+.hero-swiper .swiper-slide {
+  height: 100%;
+}
+
 @theme {
   /* Typography: Plus Jakarta Sans for headings & Inter for body/content */
   --font-heading: var(--font-heading), sans-serif;

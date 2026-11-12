@@ -1,12 +1,29 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   experimental: {
     agentFeedback: true,
   },
   cacheComponents: true,
   partialPrefetching: true,
+
+  // ── WordPress image domain whitelist ──────────────────────
+  // WooCommerce product image গুলো এই domain থেকে আসবে
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "baazzo.com",
+        pathname: "/wp-content/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.baazzo.com",
+        pathname: "/wp-content/uploads/**",
+      },
+    ],
+  },
+
   turbopack: {
     rules: {
       "*.css": {
