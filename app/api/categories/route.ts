@@ -12,6 +12,7 @@
  * Example: /api/categories?parent=0&hide_empty=true&per_page=20
  */
 
+import { connection } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { wooFetchWithMeta } from "@/lib/woocommerce";
 import type { WooCategory } from "@/types/woocommerce";
@@ -20,6 +21,8 @@ const ALLOWED_ORDERBY = ["id", "include", "name", "slug", "term_group", "descrip
 const ALLOWED_ORDER = ["asc", "desc"] as const;
 
 export async function GET(req: NextRequest) {
+  // Opt out of prerendering — this route depends on runtime request data
+  await connection();
   try {
     const { searchParams } = req.nextUrl;
 

@@ -16,6 +16,7 @@
  * Example: /api/products?page=1&per_page=12&category=23&orderby=price&order=asc
  */
 
+import { connection } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { wooFetchWithMeta } from "@/lib/woocommerce";
 import type { WooProduct, ProductQueryParams } from "@/types/woocommerce";
@@ -26,6 +27,8 @@ const ALLOWED_ORDER = ["asc", "desc"] as const;
 const ALLOWED_STOCK = ["instock", "outofstock", "onbackorder"] as const;
 
 export async function GET(req: NextRequest) {
+  // Opt out of prerendering — this route depends on runtime request data
+  await connection();
   try {
     const { searchParams } = req.nextUrl;
 

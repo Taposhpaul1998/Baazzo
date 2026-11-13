@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   FaBicycle,
   FaChair,
@@ -73,67 +74,78 @@ const categories = [
   },
 ];
 
+// Swiper's Autoplay module calls new Date() internally, which triggers
+// Next.js 16's unstable-value prerender error. Wrapping in Suspense
+// defers rendering to the client and avoids the prerender attempt.
+function CategorySliderInner() {
+  return (
+    <Swiper
+      modules={[Autoplay]}
+      spaceBetween={16}
+      slidesPerView={2}
+      loop={true}
+      autoplay={{ delay: 2500, disableOnInteraction: false }}
+      breakpoints={{
+        480: { slidesPerView: 1 },
+        768: { slidesPerView: 2 },
+        1024: { slidesPerView: 3 },
+        1280: { slidesPerView: 4 },
+      }}
+    >
+      {categories.map((cat) => {
+        const Icon = cat.icon;
+        return (
+          <SwiperSlide key={cat.href}>
+            <Link
+              href={cat.href}
+              className={`
+                group flex flex-col items-center justify-center gap-3
+                bg-white border-2 border-slate-100 rounded-2xl
+                px-4 py-6 md:py-8
+                transition-all duration-300
+                ${cat.borderHover}
+                hover:shadow-lg hover:shadow-black/8
+                hover:-translate-y-1
+              `}
+            >
+              {/* Icon box */}
+              <div
+                className={`
+                  ${cat.iconBg} ${cat.iconColor}
+                  flex items-center justify-center
+                  w-14 h-14 md:w-16 md:h-16 rounded-xl
+                  transition-transform duration-300
+                  group-hover:scale-110
+                `}
+              >
+                <Icon className="w-7 h-7 md:w-8 md:h-8" />
+              </div>
+
+              {/* Label */}
+              <span
+                className="
+                  text-sm md:text-base font-body font-semibold
+                  text-slate-700 text-center leading-tight
+                  transition-colors duration-200
+                  group-hover:text-primary
+                "
+              >
+                {cat.label}
+              </span>
+            </Link>
+          </SwiperSlide>
+        );
+      })}
+    </Swiper>
+  );
+}
+
 export default function CategorySlider() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-6 md:py-8">
-      <Swiper
-        modules={[Autoplay]}
-        spaceBetween={16}
-        slidesPerView={2}
-        loop={true}
-        autoplay={{ delay: 2500, disableOnInteraction: false }}
-        breakpoints={{
-          480: { slidesPerView: 1 },
-          768: { slidesPerView: 2 },
-          1024: { slidesPerView: 3 },
-          1280: { slidesPerView: 4 },
-        }}
-      >
-        {categories.map((cat) => {
-          const Icon = cat.icon;
-          return (
-            <SwiperSlide key={cat.href}>
-              <Link
-                href={cat.href}
-                className={`
-                  group flex flex-col items-center justify-center gap-3
-                  bg-white border-2 border-slate-100 rounded-2xl
-                  px-4 py-6 md:py-8
-                  transition-all duration-300
-                  ${cat.borderHover}
-                  hover:shadow-lg hover:shadow-black/8
-                  hover:-translate-y-1
-                `}
-              >
-                {/* Icon box */}
-                <div
-                  className={`
-                    ${cat.iconBg} ${cat.iconColor}
-                    flex items-center justify-center
-                    w-14 h-14 md:w-16 md:h-16 rounded-xl
-                    transition-transform duration-300
-                    group-hover:scale-110
-                  `}
-                >
-                  <Icon className="w-7 h-7 md:w-8 md:h-8" />
-                </div>
-
-                {/* Label */}
-                <span
-                  className="
-                    text-sm md:text-base font-body font-semibold
-                    text-slate-700 text-center leading-tight
-                    transition-colors duration-200
-                    group-hover:text-primary
-                  "
-                >
-                  {cat.label}
-                </span>
-              </Link>
-            </SwiperSlide>
-          );
-        })}
-      </Swiper>
+      <Suspense fallback={<div className="h-32" />}>
+        <CategorySliderInner />
+      </Suspense>
     </section>
   );
 }
