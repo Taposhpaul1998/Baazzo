@@ -9,22 +9,20 @@
  *   const products = await wooFetch("/products?per_page=12");
  */
 
-import "server-only";
 import { decodeHtmlEntities } from "@/lib/formatters";
-export { decodeHtmlEntities };
 import type {
   WooCategory,
   WooImage,
   WooProduct,
   WooStoreProduct,
 } from "@/types/woocommerce";
+import "server-only";
+export { decodeHtmlEntities };
 
 const BASE_URL = process.env.WOOCOMMERCE_URL;
-const CONSUMER_KEY = process.env.WOOCOMMERCE_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 
 // Startup check — missing env vars থাকলে সাথে সাথে জানাবে
-if (!BASE_URL || !CONSUMER_KEY || !CONSUMER_SECRET) {
+if (!BASE_URL ) {
   throw new Error(
     "[WooCommerce] Missing environment variables. " +
       "Check WOOCOMMERCE_URL, WOOCOMMERCE_CONSUMER_KEY, WOOCOMMERCE_CONSUMER_SECRET in .env.local"
