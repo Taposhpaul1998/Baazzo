@@ -71,7 +71,7 @@ function AccordionSection({
     <div className="border-b border-slate-700/60 last:border-0">
       <button
         onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between py-3.5 text-sm font-semibold text-slate-300 hover:text-primary transition-colors"
+        className="w-full flex items-center justify-between py-3.5 text-sm font-semibold text-slate-300 hover:text-primary transition-colors cursor-pointer"
       >
         {title}
         {open ? (
@@ -204,7 +204,7 @@ export default function ShopFilters({
                   className={`text-left text-sm px-3 py-2 rounded-lg transition-all duration-150 ${
                     active
                       ? "bg-primary/15 text-primary font-semibold"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer"
                   }`}
                 >
                   {opt.label}
@@ -226,7 +226,7 @@ export default function ShopFilters({
                   className={`text-left text-sm px-3 py-2 rounded-lg transition-all duration-150 ${
                     active
                       ? "bg-primary/15 text-primary font-semibold"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer"
                   }`}
                 >
                   {p.label}
@@ -283,7 +283,7 @@ export default function ShopFilters({
                 className={`text-left text-sm px-3 py-2 rounded-lg transition-all duration-150 flex items-center justify-between ${
                   !filters.category
                     ? "bg-primary/15 text-primary font-semibold"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer"
                 }`}
               >
                 <span>All Categories</span>
@@ -298,7 +298,7 @@ export default function ShopFilters({
                     className={`text-left text-sm px-3 py-2 rounded-lg transition-all duration-150 flex items-center justify-between ${
                       isActive
                         ? "bg-primary/15 text-primary font-semibold"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer"
                     }`}
                   >
                     <span className="truncate">{cat.name}</span>
@@ -362,7 +362,7 @@ export default function ShopFilters({
                 className={`text-left text-sm px-3 py-2 rounded-lg transition-all duration-150 ${
                   filters.stock_status === opt.value
                     ? "bg-primary/15 text-primary font-semibold"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer"
                 }`}
               >
                 {opt.label}
