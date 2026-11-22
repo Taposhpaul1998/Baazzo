@@ -1,11 +1,11 @@
 /**
- * WooCommerce Server-Only Store API Client
+ * WooCommerce Store API Client
  *
- * এই ফাইল শুধু server-side এ চলবে।
- * Store API public — কোনো Consumer Key বা Consumer Secret প্রয়োজন নেই।
+ * Headless storefront API (/wp-json/wc/store/v1) এর জন্য হেল্পার ফাংশন।
+ * Consumer Key / Secret প্রয়োজন নেই।
  *
  * Usage:
- *   import { wooStoreFetch, wooStoreFetchWithMeta } from "@/lib/woocommerce";
+ *   import { wooStoreFetch, wooStoreFetchWithMeta, mapStoreProductToWooProduct } from "@/lib/woocommerce";
  *   const products = await wooStoreFetch<WooStoreProduct[]>("/products?per_page=12");
  */
 
@@ -16,84 +16,111 @@ import type {
   WooProduct,
   WooStoreProduct,
 } from "@/types/woocommerce";
-import "server-only";
+
 export { decodeHtmlEntities };
 
-const BASE_URL = process.env.WOOCOMMERCE_URL;
+const BASE_URL = process.env.WOOCOMMERCE_URL?.replace(/\/+$/, "");
 
-// Startup check — missing WOOCOMMERCE_URL থাকলে সাথে সাথে জানাবে
 if (!BASE_URL) {
   throw new Error(
-    "[WooCommerce] Missing environment variable. Check WOOCOMMERCE_URL in .env.local"
+    "[WooCommerce] Missing environment variable: WOOCOMMERCE_URL. Check .env.local"
+  );
+}
+
+type WooRequestOptions = RequestInit & {
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
+};
+
+function buildStoreUrl(endpoint: string): string {
+  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  return `${BASE_URL}/wp-json/wc/store/v1${normalizedEndpoint}`;
+}
+
+async function parseErrorResponse(res: Response, endpoint: string): Promise<never> {
+  let details = "";
+  try {
+    details = await res.text();
+  } catch {
+    details = res.statusText;
+  }
+
+  throw new Error(
+    `[WooCommerce Store API] Request failed (${res.status}) on "${endpoint}": ${details}`
   );
 }
 
 /**
- * WooCommerce Store API v1 fetch করে (Public / headless storefront API).
- * @param endpoint  — "/products", "/cart" ইত্যাদি
+ * WooCommerce Store API v1 থেকে JSON ডেটা ফেচ করে।
  */
 export async function wooStoreFetch<T>(
   endpoint: string,
-  options: RequestInit & { next?: { revalidate?: number } } = {}
+  options: WooRequestOptions = {}
 ): Promise<T> {
-  const url = `${BASE_URL}/wp-json/wc/store/v1${endpoint}`;
+  const { headers, next, ...restOptions } = options;
+  const url = buildStoreUrl(endpoint);
 
   const res = await fetch(url, {
-    ...options,
+    ...restOptions,
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      ...options.headers,
+      ...headers,
     },
-    next: { revalidate: 300, ...options.next },
+    next: {
+      revalidate: 300,
+      ...next,
+    },
   });
 
   if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(
-      `[WooCommerce Store API] error ${res.status} on "${endpoint}": ${errorText}`
-    );
+    await parseErrorResponse(res, endpoint);
   }
 
-  return res.json() as Promise<T>;
+  return (await res.json()) as T;
 }
 
 /**
- * Fetches Store API data together with pagination headers.
- * Store API exposes totals through X-WP-Total and X-WP-TotalPages.
+ * Store API ডেটার সাথে pagination headers (X-WP-Total, X-WP-TotalPages) রিটার্ন করে।
  */
 export async function wooStoreFetchWithMeta<T>(
   endpoint: string,
-  options: RequestInit & { next?: { revalidate?: number } } = {}
+  options: WooRequestOptions = {}
 ): Promise<{ data: T; total: number; totalPages: number }> {
-  const url = `${BASE_URL}/wp-json/wc/store/v1${endpoint}`;
+  const { headers, next, ...restOptions } = options;
+  const url = buildStoreUrl(endpoint);
 
   const res = await fetch(url, {
-    ...options,
+    ...restOptions,
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      ...options.headers,
+      ...headers,
     },
-    next: { revalidate: 300, ...options.next },
+    next: {
+      revalidate: 300,
+      ...next,
+    },
   });
 
   if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(
-      `[WooCommerce Store API] error ${res.status} on "${endpoint}": ${errorText}`
-    );
+    await parseErrorResponse(res, endpoint);
   }
 
   const data = (await res.json()) as T;
-  const total = Number(res.headers.get("X-WP-Total") ?? 0);
-  const totalPages = Number(res.headers.get("X-WP-TotalPages") ?? 1);
+  const totalHeader = res.headers.get("X-WP-Total");
+  const totalPagesHeader = res.headers.get("X-WP-TotalPages");
+
+  const total = totalHeader ? Number.parseInt(totalHeader, 10) || 0 : 0;
+  const totalPages = totalPagesHeader ? Math.max(1, Number.parseInt(totalPagesHeader, 10) || 1) : 1;
 
   return { data, total, totalPages };
 }
 
 /**
- * Maps WooCommerce Store API product response to WooProduct interface.
+ * Store API প্রোডাক্ট রেসপন্সকে অ্যাপের স্ট্যান্ডার্ড WooProduct ফরম্যাটে ম্যাপ করে।
  */
 export function mapStoreProductToWooProduct(p: WooStoreProduct): WooProduct {
   return {
@@ -118,18 +145,19 @@ export function mapStoreProductToWooProduct(p: WooStoreProduct): WooProduct {
       name: img.name ?? "",
       alt: decodeHtmlEntities(img.alt ?? ""),
     })),
-    categories: (p.categories ?? []).map((c: Partial<Pick<WooCategory, "id" | "name" | "slug">>) => ({
-      id: c.id ?? 0,
-      name: decodeHtmlEntities(c.name ?? ""),
-      slug: c.slug ?? "",
-    })),
+    categories: (p.categories ?? []).map(
+      (c: Partial<Pick<WooCategory, "id" | "name" | "slug">>) => ({
+        id: c.id ?? 0,
+        name: decodeHtmlEntities(c.name ?? ""),
+        slug: c.slug ?? "",
+      })
+    ),
     attributes: (p.attributes ?? [])
       .map((attribute) => ({
         ...attribute,
-        options:
-          attribute.options?.length
-            ? attribute.options
-            : (attribute.terms ?? []).map((term) => term.name),
+        options: attribute.options?.length
+          ? attribute.options
+          : (attribute.terms ?? []).map((term) => term.name),
       }))
       .filter((attribute) => attribute.options.length > 0),
     variations: p.variations ?? [],
