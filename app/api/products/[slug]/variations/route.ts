@@ -1,12 +1,12 @@
 /**
  * GET /api/products/[slug]/variations
  *
- * Variable product-এর সব variations server-side-এ fetch করে।
+ * Variable product-এর সব variations server-side-এ Store API থেকে fetch করে।
  */
 
 import { connection } from "next/server";
 import { NextResponse } from "next/server";
-import { wooStoreFetch, wooFetch } from "@/lib/woocommerce";
+import { wooStoreFetch } from "@/lib/woocommerce";
 import type { WooStoreProduct } from "@/types/woocommerce";
 
 interface WooVariation {
@@ -28,7 +28,7 @@ export async function GET(
   const { slug } = await params;
 
   try {
-    // 1️⃣ Store API দিয়ে product খোঁজো যাতে ID পাওয়া যায়
+    // 1️⃣ Store API দিয়ে product খোঁজো যাতে ID এবং variations array পাওয়া যায়
     const storeProducts = await wooStoreFetch<WooStoreProduct[]>(
       `/products?slug=${encodeURIComponent(slug)}&status=publish`
     );
@@ -43,9 +43,38 @@ export async function GET(
       return NextResponse.json({ data: [] }, { status: 200 });
     }
 
-    // 2️⃣ REST API দিয়ে variations fetch করো
-    const variations = await wooFetch<WooVariation[]>(
-      `products/${product.id}/variations?per_page=100&_fields=id,price,regular_price,sale_price,stock_status,image,attributes,status`
+    // 2️⃣ Store API দিয়ে প্রতিটি variation fetch করো
+    const variationPromises = product.variations.map(async (vId) => {
+      try {
+        const v = await wooStoreFetch<WooStoreProduct>(`/products/${vId}`);
+        const img = v.images?.[0];
+        return {
+          id: v.id,
+          price: v.prices?.price ?? v.price ?? "",
+          regular_price: v.prices?.regular_price ?? v.regular_price ?? "",
+          sale_price: v.prices?.sale_price ?? v.sale_price ?? "",
+          stock_status: v.is_in_stock !== false ? "instock" : "outofstock",
+          status: v.status ?? "publish",
+          image: img
+            ? {
+                id: img.id ?? 0,
+                src: img.src ?? "",
+                alt: img.alt ?? "",
+              }
+            : null,
+          attributes: (v.attributes ?? []).map((attr) => ({
+            id: attr.id ?? 0,
+            name: attr.name ?? "",
+            option: attr.options?.[0] ?? "",
+          })),
+        };
+      } catch {
+        return null;
+      }
+    });
+
+    const variations = (await Promise.all(variationPromises)).filter(
+      (v): v is WooVariation => v !== null
     );
 
     const publishedVariations = variations.filter((v) => v.status === "publish");

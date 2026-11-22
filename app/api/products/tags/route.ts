@@ -9,7 +9,7 @@
  *   order       — asc | desc
  */
 
-import { wooFetchWithMeta } from "@/lib/woocommerce";
+import { wooStoreFetchWithMeta } from "@/lib/woocommerce";
 import { connection, NextRequest, NextResponse } from "next/server";
 
 export interface WooTag {
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
       hide_empty: String(hide_empty),
     });
 
-    const { data, total, totalPages } = await wooFetchWithMeta<WooTag[]>(
+    const { data, total, totalPages } = await wooStoreFetchWithMeta<WooTag[]>(
       `/products/tags?${params.toString()}`
     );
 

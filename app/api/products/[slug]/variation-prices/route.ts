@@ -2,7 +2,6 @@
  * GET /api/products/[slug]/variation-prices
  *
  * Variable product-এর variation prices server-side-এ Store API থেকে fetch করে।
- * WooCommerce credentials কখনো browser-এ যায় না।
  *
  * Response shape:
  *   { type: "simple" | "variable", min: number|null, max: number|null, formatted: string }
@@ -10,17 +9,8 @@
 
 import { connection } from "next/server";
 import { NextResponse } from "next/server";
-import { wooStoreFetch, wooFetch } from "@/lib/woocommerce";
+import { wooStoreFetch } from "@/lib/woocommerce";
 import type { WooStoreProduct } from "@/types/woocommerce";
-
-// Variation-এর জন্য minimal type
-interface WooVariation {
-  id: number;
-  price: string;
-  regular_price: string;
-  sale_price: string;
-  status: "publish" | "private" | "draft";
-}
 
 // ৳ format helper
 function formatPrice(amount: number): string {
@@ -88,15 +78,25 @@ export async function GET(
       );
     }
 
-    // 4️⃣ Fallback: Variable product → variations fetch via REST API
-    const variations = await wooFetch<WooVariation[]>(
-      `products/${product.id}/variations?per_page=100&_fields=id,price,regular_price,sale_price,status`
-    );
+    // 4️⃣ Fallback: Variable product → variations fetch via Store API
+    const variationPromises = product.variations.map(async (vId) => {
+      try {
+        const v = await wooStoreFetch<WooStoreProduct>(`/products/${vId}`);
+        return {
+          price: v.prices?.price ?? v.price ?? "",
+          status: v.status ?? "publish",
+        };
+      } catch {
+        return null;
+      }
+    });
+
+    const variations = (await Promise.all(variationPromises)).filter(Boolean);
 
     // Published variations শুধু
     const prices = variations
-      .filter((v) => v.status === "publish" && v.price !== "")
-      .map((v) => parseFloat(v.price))
+      .filter((v) => v && v.status === "publish" && v.price !== "")
+      .map((v) => parseFloat(v!.price))
       .filter((p) => !isNaN(p) && p > 0);
 
     if (!prices.length) {
