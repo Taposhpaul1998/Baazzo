@@ -11,6 +11,46 @@ export interface WooImage {
   alt: string;
 }
 
+// WooCommerce Store API product response
+export interface WooStoreProduct {
+  id: number;
+  name: string;
+  slug: string;
+  sku?: string;
+  type?: string;
+  status?: string;
+  price?: string;
+  regular_price?: string;
+  sale_price?: string;
+  on_sale?: boolean;
+  price_range?: {
+    min_amount?: string;
+    max_amount?: string;
+    [key: string]: unknown;
+  } | null;
+  prices?: {
+    price?: string;
+    regular_price?: string;
+    sale_price?: string;
+    price_range?: {
+      min_amount?: string;
+      max_amount?: string;
+      [key: string]: unknown;
+    } | null;
+  };
+  is_on_sale?: boolean;
+  is_in_stock?: boolean;
+  average_rating?: string | number;
+  review_count?: number;
+  rating_count?: number;
+  short_description?: string;
+  description?: string;
+  images?: Array<Partial<WooImage>>;
+  categories?: Array<Partial<Pick<WooCategory, "id" | "name" | "slug">>>;
+  attributes?: WooAttribute[];
+  variations?: number[];
+}
+
 // ── Category ──────────────────────────────────────────────────
 export interface WooCategory {
   id: number;
@@ -32,6 +72,26 @@ export interface WooAttribute {
   visible: boolean;
   variation: boolean;
   options: string[];
+  has_variations?: boolean;
+  terms?: Array<{ id: number; name: string; slug: string }>;
+}
+
+export interface WooVariationAttribute {
+  id?: number;
+  name: string;
+  option?: string;
+  value?: string;
+}
+
+export interface WooVariation {
+  id: number;
+  price: string;
+  regular_price: string;
+  sale_price: string;
+  stock_status: "instock" | "outofstock" | "onbackorder";
+  image?: WooImage;
+  attributes: WooVariationAttribute[];
+  status: string;
 }
 
 // ── Product ───────────────────────────────────────────────────
@@ -55,6 +115,10 @@ export interface WooProduct {
   categories: { id: number; name: string; slug: string }[];
   attributes: WooAttribute[];
   variations: number[];
+  price_range?: {
+    min_amount?: string;
+    max_amount?: string;
+  } | string | null;
 }
 
 // ── API Response Wrappers ─────────────────────────────────────

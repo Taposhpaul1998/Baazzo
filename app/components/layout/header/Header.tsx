@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import TopBar from "./TopBar";
 import DesktopHeader from "./DesktopHeader";
 import MobileHeader from "./MobileHeader";
@@ -8,11 +9,13 @@ export default function Header() {
       {/* 1. Top Bar (Hotline, WhatsApp, Support Hours) */}
       <TopBar />
 
-      {/* 2. Desktop Header (Logo, Search, Account, Cart + Nav Menu) */}
-      <DesktopHeader />
+      <Suspense fallback={null}>
+        {/* 2. Desktop Header (Logo, Search, Account, Cart + Nav Menu) */}
+        <DesktopHeader />
 
-      {/* 3. Mobile Header (Logo, Search Icon, Account, Cart + Hamburger Menu) */}
-      <MobileHeader />
+        {/* 3. Mobile Header (Logo, Search Icon, Account, Cart + Hamburger Menu) */}
+        <MobileHeader />
+      </Suspense>
     </header>
   );
 }

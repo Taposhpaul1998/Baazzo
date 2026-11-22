@@ -18,7 +18,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 const categories = [
   {
     label: "Treadmill",
-    href: "/treadmill",
+    href: "/categories/treadmill",
     icon: TbTreadmill,
     iconBg: "bg-orange-100",
     iconColor: "text-primary",
@@ -26,7 +26,7 @@ const categories = [
   },
   {
     label: "Exercise Bike",
-    href: "/exercise-bike",
+    href: "/categories/exercise-bike",
     icon: FaBicycle,
     iconBg: "bg-blue-100",
     iconColor: "text-blue-500",
@@ -34,7 +34,7 @@ const categories = [
   },
   {
     label: "Gym Equipment",
-    href: "/gym-equipment",
+    href: "/categories/gym-equipment",
     icon: FaDumbbell,
     iconBg: "bg-green-100",
     iconColor: "text-green-500",
@@ -42,7 +42,7 @@ const categories = [
   },
   {
     label: "Sports",
-    href: "/sports",
+    href: "/categories/sports",
     icon: FaFutbol,
     iconBg: "bg-yellow-100",
     iconColor: "text-yellow-500",
@@ -50,7 +50,7 @@ const categories = [
   },
   {
     label: "Massage Chair",
-    href: "/massage-chair",
+    href: "/categories/massage-chair",
     icon: FaChair,
     iconBg: "bg-purple-100",
     iconColor: "text-purple-500",
@@ -58,7 +58,7 @@ const categories = [
   },
   {
     label: "Table Tennis",
-    href: "/table-tennis",
+    href: "/categories/table-tennis",
     icon: FaTableTennisPaddleBall,
     iconBg: "bg-red-100",
     iconColor: "text-red-500",
@@ -66,7 +66,7 @@ const categories = [
   },
   {
     label: "Brands",
-    href: "/brands",
+    href: "/shop",
     icon: FaTags,
     iconBg: "bg-slate-100",
     iconColor: "text-slate-500",
@@ -86,7 +86,6 @@ function CategorySliderInner() {
       loop={true}
       autoplay={{ delay: 2500, disableOnInteraction: false }}
       breakpoints={{
-        480: { slidesPerView: 1 },
         768: { slidesPerView: 2 },
         1024: { slidesPerView: 3 },
         1280: { slidesPerView: 4 },

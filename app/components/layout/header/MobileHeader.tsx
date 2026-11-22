@@ -11,10 +11,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import CartButton from "./CartButton";
 import { navItems } from "./navData";
+import ProductSearch from "./ProductSearch";
+import AuthTrigger from "./AuthTrigger";
 
 export default function MobileHeader() {
   const router = useRouter();
@@ -83,14 +85,7 @@ export default function MobileHeader() {
           </button>
 
           {/* 2. Profile Icon */}
-          <Link
-            href="/profile"
-            aria-label="Account Profile"
-            onClick={closeDrawer}
-            className="w-9 h-9 flex items-center justify-center text-slate-700 hover:text-primary active:bg-slate-100 rounded-lg transition-colors"
-          >
-            <FontAwesomeIcon icon={faUser} className="w-4 h-4" />
-          </Link>
+          <AuthTrigger mobile />
 
           {/* 3. Shopping Cart with Top-Right Badge */}
           <CartButton itemCount={0} isMobile={true} />
@@ -118,23 +113,7 @@ export default function MobileHeader() {
             : "max-h-0 opacity-0 border-t-0 px-4 py-0"
         }`}
       >
-        <form onSubmit={handleSearch} className="flex items-center gap-2">
-          <div className="flex-1 relative">
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search fitness equipment, sports…"
-              className="w-full px-3.5 py-2 text-sm text-slate-800 placeholder:text-slate-400 bg-white border border-slate-300 rounded-lg outline-none focus:border-primary shadow-xs"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-primary hover:bg-primary-hover active:bg-primary text-white px-4 py-2 text-sm font-medium rounded-lg transition-colors shrink-0 shadow-xs"
-          >
-            Search
-          </button>
-        </form>
+        <ProductSearch mobile onNavigate={() => setSearchOpen(false)} />
       </div>
 
       {/* ── Mobile Navigation Drawer Backdrop & Slide Panel ── */}

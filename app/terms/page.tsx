@@ -212,7 +212,7 @@ export default function TermsPage() {
             {/* Intro notice */}
             <div className="mb-8 rounded-2xl bg-orange-500/5 border border-orange-500/20 px-6 py-5">
               <p className="text-sm text-slate-300 leading-relaxed">
-                These Terms &amp; Conditions ("Terms") govern your access to and
+                These Terms &amp; Conditions (&quot;Terms&quot;) govern your access to and
                 use of the {COMPANY_NAME} website and services. By using our
                 website or placing an order, you agree to be legally bound by
                 these Terms. If you disagree with any part, please do not use

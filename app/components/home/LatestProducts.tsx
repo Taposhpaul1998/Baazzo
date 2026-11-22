@@ -29,12 +29,12 @@ export default async function LatestProducts() {
       <div className="flex items-center justify-between mb-6 md:mb-8">
         <div>
           <h2 className="text-xl md:text-2xl font-heading font-bold text-white leading-tight">
-            Latest Products
+            New Arrivals
           </h2>
         </div>
 
         <Link
-          href="/products"
+          href="/shop"
           className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-hover transition-colors duration-200 group"
         >
           <span>View All</span>
@@ -44,7 +44,7 @@ export default async function LatestProducts() {
 
       {/* Product Grid */}
       {products.length === 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
@@ -53,7 +53,7 @@ export default async function LatestProducts() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

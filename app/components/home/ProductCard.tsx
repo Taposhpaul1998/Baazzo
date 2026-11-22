@@ -18,6 +18,7 @@ export default function ProductCard({ product }: Props) {
   const image = product.images?.[0];
   const hasDiscount = product.on_sale && product.regular_price && product.sale_price;
   const detailsUrl = `/products/${product.slug}`;
+  const hasVariations = product.type === "variable" || (product.variations && product.variations.length > 0);
 
   const discountPercent =
     hasDiscount
@@ -91,7 +92,7 @@ export default function ProductCard({ product }: Props) {
           <button
             onClick={handleFavorite}
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-            className={`w-9 h-9 flex items-center justify-center rounded-full shadow-md transition-all duration-200 ${
+            className={`w-9 h-9 flex items-center justify-center rounded-full shadow-md transition-all duration-200 cursor-pointer ${
               isFavorite
                 ? "bg-primary text-white"
                 : "bg-white text-slate-600 hover:bg-primary hover:text-white"
@@ -107,24 +108,32 @@ export default function ProductCard({ product }: Props) {
 
         {/* Title — max 2 lines, rest truncated with … */}
         <Link href={detailsUrl} className="group/title">
-          <h3 className="text-xs font-semibold text-slate-800 leading-snug line-clamp-2 group-hover/title:text-primary transition-colors duration-200">
+          <h3 className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2 group-hover/title:text-primary transition-colors duration-200">
             {product.name}
           </h3>
         </Link>
 
         {/* Price */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          {hasDiscount ? (
+          {!product.price_range ? (
             <>
-              <span className="text-sm font-bold text-primary">
+              <span className="text-base font-bold text-primary">
                 ৳{parseFloat(product.sale_price).toLocaleString("en-BD")}
               </span>
-              <span className="text-xs text-slate-400 line-through">
+              <span className="text-sm text-slate-400 line-through">
                 ৳{parseFloat(product.regular_price).toLocaleString("en-BD")}
               </span>
             </>
+          ) : product.price_range && typeof product.price_range === "object" && product.price_range.min_amount && product.price_range.max_amount ? (
+            <span className="text-base font-bold text-primary">
+              ৳{parseFloat(product.price_range.min_amount).toLocaleString("en-BD")} - ৳{parseFloat(product.price_range.max_amount).toLocaleString("en-BD")}
+            </span>
+          ) : typeof product.price_range === "string" && product.price_range ? (
+            <span className="text-base font-bold text-primary">
+              {product.price_range}
+            </span>
           ) : (
-            <span className="text-sm font-bold text-primary">
+            <span className="text-base font-bold text-primary">
               {product.price
                 ? `৳${parseFloat(product.price).toLocaleString("en-BD")}`
                 : "Price on request"}
@@ -134,34 +143,46 @@ export default function ProductCard({ product }: Props) {
 
         {/* Buttons */}
         <div className="flex items-center border-t border-slate-100 mb-1">
-          {/* Add to Cart */}
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock_status === "outofstock"}
-            aria-label="Add to cart"
-            className={`flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-2 transition-colors duration-200 cursor-pointer ${
-              product.stock_status === "outofstock"
-                ? "text-slate-300 cursor-not-allowed"
-                : addedToCart
-                ? "text-green-500"
-                : "text-slate-500 hover:text-primary"
-            }`}
-          >
-            <FaShoppingCart className="w-3 h-3 shrink-0" />
-            <span>{addedToCart ? "Added!" : "Add to Cart"}</span>
-          </button>
+          {/* Primary action: variable products must be configured before adding */}
+          {hasVariations ? (
+            <Link
+              href={detailsUrl}
+              aria-label={`Select options for ${product.name}`}
+              className="flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2.5 text-slate-500 hover:text-primary transition-colors duration-200"
+            >
+              <FaArrowRight className="w-3.5 h-3.5 shrink-0" />
+              <span>Select Options</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={product.stock_status === "outofstock"}
+              aria-label={product.stock_status === "outofstock" ? "Product out of stock" : "Add to cart"}
+              className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2.5 transition-colors duration-200 cursor-pointer ${
+                product.stock_status === "outofstock"
+                  ? "text-slate-300 cursor-not-allowed"
+                  : addedToCart
+                    ? "text-primary"
+                    : "text-slate-500 hover:text-primary"
+              }`}
+            >
+              <FaShoppingCart className="w-3.5 h-3.5 shrink-0" />
+              <span>{addedToCart ? "Added!" : "Add to Cart"}</span>
+            </button>
+          )}
 
           {/* Divider */}
-          <div className="w-px h-4 bg-slate-200 shrink-0" />
+          <div className="w-px h-5 bg-slate-200 shrink-0" />
 
-          {/* Shop Now */}
+          {/* Product details */}
           <Link
             href={detailsUrl}
-            aria-label="Shop now"
-            className="flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-2 text-slate-500 hover:text-primary transition-colors duration-200"
+            aria-label={`View ${product.name}`}
+            className="flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2.5 text-slate-500 hover:text-primary transition-colors duration-200"
           >
-            <FaArrowRight className="w-3 h-3" />
-            <span>Shop Now</span>
+            <FaEye className="w-3.5 h-3.5" />
+            <span>View Product</span>
           </Link>
         </div>
       </div>

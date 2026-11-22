@@ -16,10 +16,12 @@
  * Example: /api/products?page=1&per_page=12&category=23&orderby=price&order=asc
  */
 
-import { connection } from "next/server";
-import { NextRequest, NextResponse } from "next/server";
-import { wooFetchWithMeta } from "@/lib/woocommerce";
-import type { WooProduct, ProductQueryParams } from "@/types/woocommerce";
+import {
+  wooStoreFetchWithMeta,
+  mapStoreProductToWooProduct,
+} from "@/lib/woocommerce";
+import type { WooProduct, WooStoreProduct } from "@/types/woocommerce";
+import { connection, NextRequest, NextResponse } from "next/server";
 
 // Allowed orderby values — injection থেকে রক্ষা
 const ALLOWED_ORDERBY = ["date", "id", "title", "price", "popularity", "rating"] as const;
@@ -36,11 +38,15 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
     const per_page = Math.min(
       100,
-      Math.max(1, parseInt(searchParams.get("per_page") ?? "12", 10) || 12)
+      Math.max(1, parseInt(searchParams.get("per_page") ?? "32", 10) || 12)
     );
 
     const search = searchParams.get("search")?.trim().slice(0, 100) ?? "";
-    const category = searchParams.get("category")?.replace(/\D/g, "") ?? ""; // শুধু digits
+    const categoriesParam =
+      searchParams.get("categories") ??
+      searchParams.get("category") ??
+      "";
+    const categories = categoriesParam.trim().slice(0, 100).replace(/[^a-zA-Z0-9-_]/g, "");
     const min_price = searchParams.get("min_price")?.replace(/[^\d.]/g, "") ?? "";
     const max_price = searchParams.get("max_price")?.replace(/[^\d.]/g, "") ?? "";
 
@@ -73,16 +79,20 @@ export async function GET(req: NextRequest) {
     });
 
     if (search) params.set("search", search);
-    if (category) params.set("category", category);
+    if (categories) params.set("categories", categories);
     if (min_price) params.set("min_price", min_price);
     if (max_price) params.set("max_price", max_price);
     if (stock_status) params.set("stock_status", stock_status);
     if (on_sale) params.set("on_sale", on_sale);
 
-    // ── Fetch from WooCommerce (server-side only) ──────────────
-    const { data, total, totalPages } = await wooFetchWithMeta<WooProduct[]>(
-      `/products?${params.toString()}`
+    // ── Fetch from WooCommerce Store API (server-side only) ────
+    const response = await wooStoreFetchWithMeta<WooStoreProduct[]>(
+      `/products?${params.toString()}`,
+      { next: { revalidate: 300 } }
     );
+    const data: WooProduct[] = (response.data ?? []).map(mapStoreProductToWooProduct);
+    const total = response.total || data.length;
+    const totalPages = response.totalPages || (data.length < per_page ? page : page + 1);
 
     return NextResponse.json(
       { data, total, totalPages, page, per_page },

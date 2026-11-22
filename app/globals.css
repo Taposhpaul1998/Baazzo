@@ -34,3 +34,16 @@
   --color-dark-border: #1e293b;
   --color-dark-muted: #94a3b8;
 }
+
+.auth-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.auth-input::placeholder { color: #94a3b8; }
+.auth-input:focus { border-color: #f06a38; box-shadow: 0 0 0 3px rgb(240 106 56 / 15%); }

@@ -1,20 +1,22 @@
 /**
  * GET /api/products/latest
  *
+ * WooCommerce Store API (/wp-json/wc/store/v1/products) ব্যবহার করে
  * সবচেয়ে নতুন ৮টি published product return করে।
- * orderby=date, order=desc, per_page=8 — fixed, কোনো query param নেই।
  */
 
 import { NextResponse } from "next/server";
-import { wooFetch } from "@/lib/woocommerce";
-import type { WooProduct } from "@/types/woocommerce";
+import { wooStoreFetch, mapStoreProductToWooProduct } from "@/lib/woocommerce";
+import type { WooProduct, WooStoreProduct } from "@/types/woocommerce";
 
 export async function GET() {
   try {
-    const products = await wooFetch<WooProduct[]>(
-      "/products?per_page=8&orderby=date&order=desc&status=publish",
+    const storeProducts = await wooStoreFetch<WooStoreProduct[]>(
+      "/products?per_page=8&orderby=date&order=desc",
       { next: { revalidate: 300 } } // 5 মিনিট cache
     );
+
+    const products: WooProduct[] = (storeProducts ?? []).map(mapStoreProductToWooProduct);
 
     return NextResponse.json(
       { data: products, count: products.length },
@@ -26,9 +28,9 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error("[/api/products/latest]", error);
+    console.error("[/api/products/latest - Store API]", error);
     return NextResponse.json(
-      { error: "Failed to fetch latest products." },
+      { error: "Failed to fetch latest products via Store API." },
       { status: 500 }
     );
   }
